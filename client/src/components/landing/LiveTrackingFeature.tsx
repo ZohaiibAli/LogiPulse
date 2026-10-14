@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
 import { Navigation2, ShieldCheck, Timer } from "lucide-react"
+import RiderMapLottie from "@/components/illustrations/RiderMapLottie"
 
 const points = [
   { icon: Timer, title: "Real-time ETA", desc: "Know exactly when your parcel will arrive, down to the minute." },
@@ -46,34 +47,8 @@ export default function LiveTrackingFeature() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.6 }}
-          className="card-glow relative rounded-[2rem] border border-indigo-100 bg-[linear-gradient(145deg,#f6f3ff_0%,#eef1ff_100%)] p-6"
         >
-          <div className="mb-4 flex items-center justify-between">
-            <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">Order #HG-20481</span>
-            <span className="text-xs font-semibold text-emerald-600">ETA 12 min</span>
-          </div>
-
-          <div className="relative h-72 overflow-hidden rounded-2xl bg-white">
-            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 320 260" fill="none">
-              <path d="M30 220 C 100 120, 120 220, 170 140 S 260 40, 300 40" stroke="#5B4FE8" strokeWidth="3" strokeDasharray="1 10" strokeLinecap="round" />
-            </svg>
-            <span className="absolute left-7 top-[78%] h-3 w-3 rounded-full bg-indigo-600 ring-4 ring-indigo-100" />
-            <span className="absolute right-6 top-[12%] flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg ring-4 ring-white">
-              <Navigation2 className="h-4 w-4" />
-            </span>
-            <span className="absolute left-[44%] top-[48%] h-10 w-10 animate-pulse-ring rounded-full border-2 border-indigo-400" />
-            <span className="absolute left-[44%] top-[48%] flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md">
-              <Navigation2 className="h-3 w-3" />
-            </span>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-white p-3 shadow-sm">
-            <div>
-              <p className="text-xs text-muted-foreground">Rider</p>
-              <p className="text-sm font-semibold">Hamza A. — Bike</p>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">In transit</span>
-          </div>
+          <RiderMapLottie className="h-96 w-full" />
         </motion.div>
       </div>
     </section>
