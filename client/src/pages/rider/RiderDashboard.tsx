@@ -7,6 +7,7 @@ import { Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed, Wallet, P
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   useRiderProfile, useToggleOnline, useAvailableOrders, useAcceptOrder, useMyOrders,
   useUpdateRiderLocation,
@@ -37,6 +38,7 @@ export default function RiderDashboard() {
   const toggleOnline = useToggleOnline()
   const [priorityFilter, setPriorityFilter] = useState<OrderPriority | "all">("all")
   const [sortBy, setSortBy] = useState<"distance" | "priority">("distance")
+  const [requestsOpen, setRequestsOpen] = useState(false)
   const { data: available, isLoading: availableLoading } = useAvailableOrders(priorityFilter, sortBy)
   const { data: myOrders } = useMyOrders()
   const acceptOrder = useAcceptOrder()
@@ -152,54 +154,35 @@ export default function RiderDashboard() {
         </div>
       </motion.div>
 
-      {earningsByDay.some((d) => d.value > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.14 }}
-          className="rounded-2xl border bg-card p-5"
-        >
-          <div className="mb-3 flex items-center gap-2">
-            <Wallet className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-bold">Earnings — last 7 days</h2>
+      <button
+        type="button"
+        onClick={() => setRequestsOpen(true)}
+        className="flex w-full items-center justify-between rounded-2xl border bg-card p-5 text-left transition-colors hover:bg-secondary/50"
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-gradient text-white">
+            <Navigation className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-base font-bold">Available requests</p>
+            <p className="text-xs text-muted-foreground">
+              {profile?.is_online ? "Tap to view nearby delivery requests" : "Go online to see nearby delivery requests"}
+            </p>
           </div>
-          <VehicleTrendChart data={earningsByDay} vehicle="bike" valuePrefix="Rs " height={160} />
-        </motion.div>
-      )}
+        </div>
+        {profile?.is_online && available && available.length > 0 && (
+          <span className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-rose-500 px-2 text-xs font-bold text-white">
+            {available.length}
+          </span>
+        )}
+      </button>
 
-      {profile?.is_online && locationError && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"
-        >
-          <MapPin className="h-4 w-4 shrink-0" />
-          {locationError}
-        </motion.div>
-      )}
-
-      {activeOrder && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.35 }}
-          className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Active delivery</p>
-              <p className="text-lg font-bold">Order #{activeOrder.id} · {formatCurrency(activeOrder.price)}</p>
-            </div>
-            <Button onClick={() => navigate(`/rider/orders/${activeOrder.id}`)} className="rounded-full bg-brand-gradient">
-              Open delivery
-            </Button>
-          </div>
-        </motion.div>
-      )}
-
-      <div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-bold">Available requests</h2>
+      <Dialog open={requestsOpen} onOpenChange={setRequestsOpen}>
+        <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold">Available requests</DialogTitle>
+        </DialogHeader>
+        <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
           {profile?.is_online && available && available.length > 0 && (
             sortBy === "distance" && available[0].distance_from_rider_km != null ? (
               <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -327,7 +310,53 @@ export default function RiderDashboard() {
             No requests right now — check back shortly.
           </div>
         )}
-      </div>
+        </DialogContent>
+      </Dialog>
+
+      {earningsByDay.some((d) => d.value > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.14 }}
+          className="rounded-2xl border bg-card p-5"
+        >
+          <div className="mb-3 flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-bold">Earnings — last 7 days</h2>
+          </div>
+          <VehicleTrendChart data={earningsByDay} vehicle="bike" valuePrefix="Rs " height={160} />
+        </motion.div>
+      )}
+
+      {profile?.is_online && locationError && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"
+        >
+          <MapPin className="h-4 w-4 shrink-0" />
+          {locationError}
+        </motion.div>
+      )}
+
+      {activeOrder && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35 }}
+          className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Active delivery</p>
+              <p className="text-lg font-bold">Order #{activeOrder.id} · {formatCurrency(activeOrder.price)}</p>
+            </div>
+            <Button onClick={() => navigate(`/rider/orders/${activeOrder.id}`)} className="rounded-full bg-brand-gradient">
+              Open delivery
+            </Button>
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 }
