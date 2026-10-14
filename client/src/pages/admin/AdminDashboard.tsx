@@ -6,7 +6,7 @@ import { useAdminStats, usePendingRiders, useMyOrders } from "@/hooks/useApi"
 import { formatCurrency, getInitials } from "@/lib/utils"
 import { bucketByDay, countByStatus } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
-import TrendBarChart from "@/components/charts/TrendBarChart"
+import VehicleTrendChart from "@/components/charts/VehicleTrendChart"
 import StatusBreakdownChart from "@/components/charts/StatusBreakdownChart"
 
 export default function AdminDashboard() {
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
           </div>
           {orders ? (
             ordersByDay.some((d) => d.value > 0) ? (
-              <TrendBarChart data={ordersByDay} height={180} />
+              <VehicleTrendChart data={ordersByDay} vehicle="radar" height={180} />
             ) : (
               <p className="py-10 text-center text-sm text-muted-foreground">No orders in this window yet.</p>
             )

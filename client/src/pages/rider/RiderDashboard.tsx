@@ -15,6 +15,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { getErrorMessage } from "@/lib/api"
 import { bucketByDay } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
+import VehicleTrendChart from "@/components/charts/VehicleTrendChart"
 import RiderHero from "@/components/rider/RiderHero"
 
 // Visual tiering for the "nearest first" distance badge/bar — purely cosmetic,
@@ -45,9 +46,10 @@ export default function RiderDashboard() {
     return Date.now() - new Date(o.delivered_at).getTime() < 7 * 24 * 60 * 60 * 1000
   }) ?? []
   const earningsThisWeek = deliveredThisWeek.reduce((sum, o) => sum + o.price, 0)
-  const earningsSparkline = myOrders
-    ? bucketByDay(myOrders, 7, (o) => (o.status === "delivered" ? o.delivered_at : null), (o) => o.price).map((d) => d.value)
+  const earningsByDay = myOrders
+    ? bucketByDay(myOrders, 7, (o) => (o.status === "delivered" ? o.delivered_at : null), (o) => o.price)
     : []
+  const earningsSparkline = earningsByDay.map((d) => d.value)
 
   // While online (and not already inside an active delivery, which tracks separately),
   // keep the rider's last-known position fresh so the admin fleet map stays live.
@@ -144,6 +146,21 @@ export default function RiderDashboard() {
           </div>
         </div>
       </motion.div>
+
+      {earningsByDay.some((d) => d.value > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.14 }}
+          className="rounded-2xl border bg-card p-5"
+        >
+          <div className="mb-3 flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-bold">Earnings — last 7 days</h2>
+          </div>
+          <VehicleTrendChart data={earningsByDay} vehicle="bike" valuePrefix="Rs " height={160} />
+        </motion.div>
+      )}
 
       {profile?.is_online && locationError && (
         <motion.div

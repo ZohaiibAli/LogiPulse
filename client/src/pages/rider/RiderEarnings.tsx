@@ -5,7 +5,7 @@ import { useMyOrders, useRiderProfile } from "@/hooks/useApi"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { bucketByDay } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
-import TrendBarChart from "@/components/charts/TrendBarChart"
+import VehicleTrendChart from "@/components/charts/VehicleTrendChart"
 
 export default function RiderEarnings() {
   const { data: orders, isLoading } = useMyOrders()
@@ -67,7 +67,7 @@ export default function RiderEarnings() {
         </div>
         {orders ? (
           earningsByDay.some((d) => d.value > 0) ? (
-            <TrendBarChart data={earningsByDay} valuePrefix="Rs " height={180} />
+            <VehicleTrendChart data={earningsByDay} vehicle="bike" valuePrefix="Rs " height={180} />
           ) : (
             <p className="py-10 text-center text-sm text-muted-foreground">No earnings in this window yet.</p>
           )

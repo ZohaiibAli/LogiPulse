@@ -7,7 +7,7 @@ import OrderCard from "@/components/orders/OrderCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { bucketByDay, countByStatus } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
-import TrendBarChart from "@/components/charts/TrendBarChart"
+import VehicleTrendChart from "@/components/charts/VehicleTrendChart"
 import StatusBreakdownChart from "@/components/charts/StatusBreakdownChart"
 import RateDeliveryCard from "@/components/orders/RateDeliveryCard"
 
@@ -78,7 +78,7 @@ export default function CustomerDashboard() {
               <TrendingUp className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-bold">Spending — last 14 days</h2>
             </div>
-            <TrendBarChart data={spendByDay} valuePrefix="Rs " height={160} />
+            <VehicleTrendChart data={spendByDay} vehicle="truck" valuePrefix="Rs " height={160} />
           </div>
 
           <div className="rounded-2xl border bg-card p-5">
