@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Bike, Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed } from "lucide-react"
+import { Bike, Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed, Wallet, PackageCheck } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -12,6 +12,8 @@ import {
 } from "@/hooks/useApi"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { getErrorMessage } from "@/lib/api"
+import { bucketByDay } from "@/lib/chartData"
+import Sparkline from "@/components/charts/Sparkline"
 
 // Visual tiering for the "nearest first" distance badge/bar — purely cosmetic,
 // the actual sort order always comes from the server's haversine calculation.
@@ -34,6 +36,15 @@ export default function RiderDashboard() {
   const watchIdRef = useRef<number | null>(null)
 
   const activeOrder = myOrders?.find((o) => !["delivered", "cancelled"].includes(o.status))
+
+  const deliveredThisWeek = myOrders?.filter((o) => {
+    if (o.status !== "delivered" || !o.delivered_at) return false
+    return Date.now() - new Date(o.delivered_at).getTime() < 7 * 24 * 60 * 60 * 1000
+  }) ?? []
+  const earningsThisWeek = deliveredThisWeek.reduce((sum, o) => sum + o.price, 0)
+  const earningsSparkline = myOrders
+    ? bucketByDay(myOrders, 7, (o) => (o.status === "delivered" ? o.delivered_at : null), (o) => o.price).map((d) => d.value)
+    : []
 
   // While online (and not already inside an active delivery, which tracks separately),
   // keep the rider's last-known position fresh so the admin fleet map stays live.
@@ -112,6 +123,30 @@ export default function RiderDashboard() {
           onCheckedChange={(checked) => toggleOnline.mutate(checked)}
           disabled={toggleOnline.isPending}
         />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-5">
+          <div className="flex items-center gap-4">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <Wallet className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-2xl font-extrabold">{formatCurrency(earningsThisWeek)}</p>
+              <p className="text-xs text-muted-foreground">Earned this week</p>
+            </div>
+          </div>
+          {earningsSparkline.length > 1 && <Sparkline values={earningsSparkline} />}
+        </div>
+        <div className="flex items-center gap-4 rounded-2xl border bg-card p-5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+            <PackageCheck className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-2xl font-extrabold">{deliveredThisWeek.length}</p>
+            <p className="text-xs text-muted-foreground">Delivered this week</p>
+          </div>
+        </div>
       </div>
 
       {profile?.is_online && locationError && (

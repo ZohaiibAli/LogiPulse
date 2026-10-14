@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom"
-import { Package, Truck, CheckCircle2, Plus, ArrowRight } from "lucide-react"
+import { Package, Truck, CheckCircle2, Plus, ArrowRight, TrendingUp, PieChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
 import { useMyOrders } from "@/hooks/useApi"
 import OrderCard from "@/components/orders/OrderCard"
 import { Skeleton } from "@/components/ui/skeleton"
+import { bucketByDay, countByStatus } from "@/lib/chartData"
+import Sparkline from "@/components/charts/Sparkline"
+import TrendBarChart from "@/components/charts/TrendBarChart"
+import StatusBreakdownChart from "@/components/charts/StatusBreakdownChart"
 
 export default function CustomerDashboard() {
   const { user } = useAuth()
@@ -14,10 +18,16 @@ export default function CustomerDashboard() {
   const delivered = orders?.filter((o) => o.status === "delivered").length ?? 0
   const total = orders?.length ?? 0
 
+  const bookingsByDay = orders ? bucketByDay(orders, 14, (o) => o.created_at, () => 1) : []
+  const spendByDay = orders ? bucketByDay(orders, 14, (o) => o.created_at, (o) => o.price) : []
+  const bookingsSparkline = bookingsByDay.slice(-10).map((d) => d.value)
+  const statusCounts = orders ? countByStatus(orders) : {}
+  const hasOrders = (orders?.length ?? 0) > 0
+
   const stats = [
     { label: "Active orders", value: active, icon: Truck, color: "bg-indigo-50 text-indigo-600" },
     { label: "Delivered", value: delivered, icon: CheckCircle2, color: "bg-emerald-50 text-emerald-600" },
-    { label: "Total bookings", value: total, icon: Package, color: "bg-violet-50 text-violet-600" },
+    { label: "Total bookings", value: total, icon: Package, color: "bg-violet-50 text-violet-600", sparkline: bookingsSparkline },
   ]
 
   return (
@@ -36,17 +46,40 @@ export default function CustomerDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (
-          <div key={s.label} className="flex items-center gap-4 rounded-2xl border bg-card p-5">
-            <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${s.color}`}>
-              <s.icon className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-2xl font-extrabold">{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
+          <div key={s.label} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-5">
+            <div className="flex items-center gap-4">
+              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${s.color}`}>
+                <s.icon className="h-5 w-5" />
+              </span>
+              <div>
+                {isLoading ? <Skeleton className="h-7 w-16" /> : <p className="text-2xl font-extrabold">{s.value}</p>}
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
             </div>
+            {s.sparkline && s.sparkline.length > 1 && <Sparkline values={s.sparkline} />}
           </div>
         ))}
       </div>
+
+      {hasOrders && (
+        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="mb-5 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold">Spending — last 14 days</h2>
+            </div>
+            <TrendBarChart data={spendByDay} valuePrefix="Rs " height={160} />
+          </div>
+
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="mb-5 flex items-center gap-2">
+              <PieChart className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold">Orders by status</h2>
+            </div>
+            <StatusBreakdownChart counts={statusCounts} />
+          </div>
+        </div>
+      )}
 
       <div>
         <div className="mb-4 flex items-center justify-between">
