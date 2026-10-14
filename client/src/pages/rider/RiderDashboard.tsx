@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Bike, Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed, Wallet, PackageCheck } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed, Wallet, PackageCheck } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   useRiderProfile, useToggleOnline, useAvailableOrders, useAcceptOrder, useMyOrders,
   useUpdateRiderLocation,
 } from "@/hooks/useApi"
+import { useAuth } from "@/contexts/AuthContext"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { getErrorMessage } from "@/lib/api"
 import { bucketByDay } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
+import RiderHero from "@/components/rider/RiderHero"
 
 // Visual tiering for the "nearest first" distance badge/bar — purely cosmetic,
 // the actual sort order always comes from the server's haversine calculation.
@@ -26,6 +28,7 @@ function distanceTier(km: number) {
 
 export default function RiderDashboard() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { data: profile, isLoading: profileLoading } = useRiderProfile()
   const toggleOnline = useToggleOnline()
   const { data: available, isLoading: availableLoading } = useAvailableOrders()
@@ -106,26 +109,19 @@ export default function RiderDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-5">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-gradient text-white">
-            <Bike className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="font-bold">{profile?.is_online ? "You're online" : "You're offline"}</p>
-            <p className="text-xs text-muted-foreground">
-              {profile?.is_online ? "Visible for new delivery requests" : "Go online to start receiving requests"}
-            </p>
-          </div>
-        </div>
-        <Switch
-          checked={profile?.is_online}
-          onCheckedChange={(checked) => toggleOnline.mutate(checked)}
-          disabled={toggleOnline.isPending}
-        />
-      </div>
+      <RiderHero
+        name={user?.full_name.split(" ")[0]}
+        online={!!profile?.is_online}
+        onToggle={(checked) => toggleOnline.mutate(checked)}
+        toggling={toggleOnline.isPending}
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.08 }}
+        className="grid gap-4 sm:grid-cols-2"
+      >
         <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-5">
           <div className="flex items-center gap-4">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -147,17 +143,26 @@ export default function RiderDashboard() {
             <p className="text-xs text-muted-foreground">Delivered this week</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {profile?.is_online && locationError && (
-        <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"
+        >
           <MapPin className="h-4 w-4 shrink-0" />
           {locationError}
-        </div>
+        </motion.div>
       )}
 
       {activeOrder && (
-        <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35 }}
+          className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Active delivery</p>
@@ -167,7 +172,7 @@ export default function RiderDashboard() {
               Open delivery
             </Button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       <div>
@@ -196,11 +201,20 @@ export default function RiderDashboard() {
           </div>
         ) : available && available.length > 0 ? (
           <div className="space-y-3">
-            {available.map((o) => {
+            <AnimatePresence initial={false}>
+            {available.map((o, i) => {
               const nearbyKm = o.distance_from_rider_km ?? null
               const tier = nearbyKm !== null ? { km: nearbyKm, ...distanceTier(nearbyKm) } : null
               return (
-                <div key={o.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-5">
+                <motion.div
+                  key={o.id}
+                  layout
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: 40 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-5"
+                >
                   <div className="flex-1 space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-sm font-semibold">Order #{o.id}</span>
@@ -243,9 +257,10 @@ export default function RiderDashboard() {
                       Accept
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               )
             })}
+            </AnimatePresence>
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">

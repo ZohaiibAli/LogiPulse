@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import { Star, Truck, Wallet, TrendingUp } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useMyOrders, useRiderProfile } from "@/hooks/useApi"
@@ -32,8 +33,14 @@ export default function RiderEarnings() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {stats.map((s) => (
-          <div key={s.label} className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-5">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: i * 0.06 }}
+            className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-5"
+          >
             <div className="flex items-center gap-4">
               <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${s.color}`}>
                 <s.icon className="h-5 w-5" />
@@ -44,11 +51,16 @@ export default function RiderEarnings() {
               </div>
             </div>
             {s.sparkline && s.sparkline.length > 1 && <Sparkline values={s.sparkline} />}
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      <div className="rounded-2xl border bg-card p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.2 }}
+        className="rounded-2xl border bg-card p-5"
+      >
         <div className="mb-5 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-bold">Earnings — last 14 days</h2>
@@ -62,7 +74,7 @@ export default function RiderEarnings() {
         ) : (
           <Skeleton className="h-[180px] w-full" />
         )}
-      </div>
+      </motion.div>
 
       <div>
         <h2 className="mb-4 text-lg font-bold">Completed deliveries</h2>

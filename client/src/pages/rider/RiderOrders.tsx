@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import { Package } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import OrderCard from "@/components/orders/OrderCard"
@@ -17,8 +18,15 @@ export default function RiderOrders() {
         </div>
       ) : orders && orders.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {orders.map((o) => (
-            <OrderCard key={o.id} order={o} to={`/rider/orders/${o.id}`} />
+          {orders.map((o, i) => (
+            <motion.div
+              key={o.id}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(i, 8) * 0.04 }}
+            >
+              <OrderCard order={o} to={`/rider/orders/${o.id}`} />
+            </motion.div>
           ))}
         </div>
       ) : (

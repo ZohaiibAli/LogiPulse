@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import { useParams, Link } from "react-router-dom"
 import { toast } from "sonner"
+import { motion } from "framer-motion"
 import { ArrowLeft, Loader2, MapPin, Navigation, Package, Phone, User } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -67,7 +68,12 @@ export default function RiderOrderDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="mx-auto max-w-5xl space-y-6"
+    >
       <Link to="/rider/orders" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to history
       </Link>
@@ -136,6 +142,6 @@ export default function RiderOrderDetail() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
