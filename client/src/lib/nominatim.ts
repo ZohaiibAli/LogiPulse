@@ -4,6 +4,11 @@
 
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org"
 
+// Restrict address search/autocomplete to Pakistan only — without this, a query
+// like "Clifton" matches Clifton, NJ (USA) or Clifton, Canada before Clifton,
+// Karachi. ISO 3166-1 alpha-2 code, comma-separated if more countries are ever needed.
+const COUNTRY_CODES = "pk"
+
 export interface GeocodeResult {
   display_name: string
   lat: number
@@ -13,7 +18,7 @@ export interface GeocodeResult {
 export async function searchAddress(query: string, signal?: AbortSignal): Promise<GeocodeResult[]> {
   if (!query.trim()) return []
 
-  const url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(query)}&limit=5&addressdetails=0`
+  const url = `${NOMINATIM_BASE}/search?format=jsonv2&q=${encodeURIComponent(query)}&limit=5&addressdetails=0&countrycodes=${COUNTRY_CODES}`
   const res = await fetch(url, { signal, headers: { Accept: "application/json" } })
   if (!res.ok) return []
 
