@@ -4,7 +4,7 @@ import { MapPin, MessageCircle, ShieldCheck, Wallet, Navigation, Users, BarChart
 import { Logo } from "@/components/logo"
 import BikeLottie from "@/components/illustrations/BikeLottie"
 import AdminScene from "@/components/illustrations/AdminScene"
-import CustomerScene from "@/components/illustrations/CustomerScene"
+import OrderLottie from "@/components/illustrations/OrderLottie"
 
 export interface AuthPanelContent {
   heading: ReactNode
@@ -24,7 +24,7 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
       { icon: MessageCircle, text: "Direct chat with your rider + AI assistant" },
       { icon: ShieldCheck, text: "Riders verified by our admin team" },
     ],
-    scene: CustomerScene,
+    scene: OrderLottie,
   },
   rider: {
     heading: (
