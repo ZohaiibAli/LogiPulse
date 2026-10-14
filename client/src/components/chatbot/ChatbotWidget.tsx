@@ -23,11 +23,11 @@ export default function ChatbotWidget() {
         setMessages(
           data.length
             ? data
-            : [{ role: "assistant", message: "Hi! I'm the SwiftShip assistant. Ask me about booking, pricing, or tracking a delivery." }]
+            : [{ role: "assistant", message: "Hi! I'm the LogiPulse assistant. Ask me about booking, pricing, or tracking a delivery." }]
         )
         setLoaded(true)
       }).catch(() => {
-        setMessages([{ role: "assistant", message: "Hi! I'm the SwiftShip assistant. Ask me anything about your deliveries." }])
+        setMessages([{ role: "assistant", message: "Hi! I'm the LogiPulse assistant. Ask me anything about your deliveries." }])
         setLoaded(true)
       })
     }
@@ -68,7 +68,7 @@ export default function ChatbotWidget() {
           <div className="flex items-center gap-2 bg-brand-gradient px-4 py-3 text-white">
             <Sparkles className="h-4 w-4" />
             <div>
-              <p className="text-sm font-semibold">SwiftShip Assistant</p>
+              <p className="text-sm font-semibold">LogiPulse Assistant</p>
               <p className="text-xs text-white/80">Powered by Gemini</p>
             </div>
           </div>

@@ -54,7 +54,7 @@ export default function Register() {
     try {
       const user = await registerUser(values)
       navigate(roleHome(user.role), { replace: true })
-      toast.success(`Welcome to SwiftShip, ${user.full_name.split(" ")[0]}!`)
+      toast.success(`Welcome to LogiPulse, ${user.full_name.split(" ")[0]}!`)
     } catch (error) {
       toast.error(getErrorMessage(error))
     } finally {

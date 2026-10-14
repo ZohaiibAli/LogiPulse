@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-extrabold">Admin overview</h1>
-        <p className="text-sm text-muted-foreground">Platform-wide snapshot of SwiftShip.</p>
+        <p className="text-sm text-muted-foreground">Platform-wide snapshot of LogiPulse.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

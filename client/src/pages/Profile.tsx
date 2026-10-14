@@ -11,7 +11,7 @@ export default function Profile() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold">Profile</h1>
-        <p className="text-sm text-muted-foreground">Your SwiftShip account details.</p>
+        <p className="text-sm text-muted-foreground">Your LogiPulse account details.</p>
       </div>
 
       <div className="rounded-2xl border bg-card p-6">

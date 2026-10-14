@@ -5,7 +5,7 @@ export default function AdminLogin() {
     <RoleLoginForm
       role="admin"
       title="Admin login"
-      subtitle="Sign in to manage SwiftShip's platform."
+      subtitle="Sign in to manage LogiPulse's platform."
       demoHint={{ email: "admin@swiftship.com", password: "admin12345" }}
       showSignup={false}
     />

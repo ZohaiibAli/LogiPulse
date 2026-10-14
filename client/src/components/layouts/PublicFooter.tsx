@@ -33,7 +33,7 @@ export default function PublicFooter() {
 
       <div className="border-t border-white/10 py-6">
         <p className="container text-center text-xs text-white/40">
-          © {new Date().getFullYear()} SwiftShip Logistics. Built for the hackathon demo.
+          © {new Date().getFullYear()} LogiPulse
         </p>
       </div>
     </footer>

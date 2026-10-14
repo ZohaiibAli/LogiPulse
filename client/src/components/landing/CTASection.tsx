@@ -13,7 +13,7 @@ export default function CTASection() {
             Ready to send your first parcel?
           </h2>
           <p className="relative mx-auto mt-4 max-w-md text-white/80">
-            Join customers and riders already using SwiftShip for fast, trackable deliveries.
+            Join customers and riders already using LogiPulse for fast, trackable deliveries.
           </p>
           <div className="relative mt-8 flex flex-wrap items-center justify-center gap-4">
             <Button asChild size="lg" className="h-12 rounded-full bg-white px-7 text-base text-indigo-700 hover:bg-white/90">

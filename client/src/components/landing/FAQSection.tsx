@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "What areas are supported?",
-    a: "SwiftShip works anywhere Google Maps has coverage — pickup and drop-off locations are set directly on the map.",
+    a: "LogiPulse works anywhere Google Maps has coverage — pickup and drop-off locations are set directly on the map.",
   },
 ]
 
