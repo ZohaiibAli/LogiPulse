@@ -12,7 +12,7 @@ import AddressAutocomplete from "@/components/maps/AddressAutocomplete"
 import RouteMap from "@/components/maps/RouteMap"
 import { useCreateOrder, useEstimate } from "@/hooks/useApi"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
-import { reverseGeocode } from "@/lib/geocode"
+import { reverseGeocode } from "@/lib/nominatim"
 import { formatCurrency } from "@/lib/utils"
 import { getErrorMessage as apiError } from "@/lib/api"
 

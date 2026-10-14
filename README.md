@@ -6,7 +6,7 @@ with live GPS tracking, in-app chat, and a Gemini-powered AI assistant.
 
 ## Stack
 
-- **Frontend**: React + TypeScript + Vite, Tailwind CSS, shadcn/ui, React Query, React Hook Form + Zod, Google Maps JS API, native WebSockets
+- **Frontend**: React + TypeScript + Vite, Tailwind CSS, shadcn/ui, React Query, React Hook Form + Zod, Leaflet + OpenStreetMap, native WebSockets
 - **Backend**: FastAPI, SQLAlchemy, PostgreSQL (Neon), JWT auth, native FastAPI WebSockets, Gemini API (`google-genai`)
 
 ## Project structure
@@ -61,7 +61,26 @@ Runs at `http://localhost:5173`.
 |---|---|---|
 | `VITE_API_URL` | yes | defaults to `http://localhost:8000` |
 | `VITE_WS_URL` | yes | defaults derived from `VITE_API_URL` |
-| `VITE_GOOGLE_MAPS_API_KEY` | for maps | enable **Maps JavaScript API**, **Places API**, and **Directions API** on the same key in Google Cloud Console (free $200/month credit covers typical hackathon usage). Without it, the app still runs fully — map widgets fall back to a styled placeholder. |
+
+No maps API key needed at all — see below.
+
+## Maps: OpenStreetMap, not Google
+
+Every map, address search, and route line runs on free, keyless services instead of the
+Google Maps Platform (which requires a billing account even to stay within its free tier):
+
+| Need | Service used | Notes |
+|---|---|---|
+| Map tiles | OpenStreetMap tile servers | `client/src/components/maps/RouteMap.tsx`, `FleetMap.tsx` via `react-leaflet` |
+| Address search (pickup/drop-off) | [Nominatim](https://nominatim.openstreetmap.org) | `client/src/components/maps/AddressAutocomplete.tsx`, debounced ~1 req/sec per its usage policy |
+| "Use current location" reverse geocoding | Nominatim | `client/src/lib/nominatim.ts` |
+| Route line between pickup and drop-off | [OSRM](https://router.project-osrm.org) public demo server | `client/src/lib/osrm.ts`, falls back to a straight line if the demo server is unreachable |
+| Distance used for pricing & nearby-pickup sorting | Haversine formula, computed server-side | Never depends on any map provider at all |
+
+No signup, no API key, no billing account — it just works. The trade-off: these are free
+public demo-tier services, a notch below Google's polish (address search is a little less
+typo-tolerant, routing can be slower under heavy load), which is a fine trade for a
+hackathon-scale app.
 
 ## Architecture: three connected dashboards, one shared system
 
@@ -113,4 +132,4 @@ hardcoded label.
 - If the rider's location isn't known yet, the feed falls back to newest-first and tells
   the rider to enable location — it never fabricates a distance.
 - The same haversine formula also drives fare pricing (`POST /orders/estimate`), so pricing
-  and nearby-sorting both work correctly even without a Google Maps API key.
+  and nearby-sorting both work correctly independent of the map provider.

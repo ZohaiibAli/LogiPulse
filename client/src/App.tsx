@@ -4,7 +4,6 @@ import { Toaster } from "sonner"
 
 import { router } from "./Router"
 import { AuthProvider } from "@/contexts/AuthContext"
-import { MapsProvider } from "@/contexts/MapsContext"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
 
 const queryClient = new QueryClient({
@@ -31,9 +30,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <MapsProvider>
-            <AppShell />
-          </MapsProvider>
+          <AppShell />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
