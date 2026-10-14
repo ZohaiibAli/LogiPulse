@@ -14,6 +14,8 @@ import CustomerLogin from "@/pages/public/CustomerLogin"
 import RiderLogin from "@/pages/public/RiderLogin"
 import AdminLogin from "@/pages/public/AdminLogin"
 import Register from "@/pages/public/Register"
+import ForgotPassword from "@/pages/public/ForgotPassword"
+import ResetPassword from "@/pages/public/ResetPassword"
 import NoMatch from "@/pages/NoMatch"
 import Error500 from "@/pages/Error500"
 import Profile from "@/pages/Profile"
@@ -69,6 +71,8 @@ export const router = createBrowserRouter([
   { path: "/login/rider", element: <RiderLogin /> },
   { path: "/login/admin", element: <AdminLogin /> },
   { path: "/register", element: <Register /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/reset-password", element: <ResetPassword /> },
 
   {
     element: <ProtectedRoute allow={["customer"]} />,

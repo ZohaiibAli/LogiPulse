@@ -11,10 +11,12 @@ class OrderCreate(BaseModel):
     pickup_address: str
     pickup_lat: float
     pickup_lng: float
+    pickup_details: Optional[str] = None
 
     dropoff_address: str
     dropoff_lat: float
     dropoff_lng: float
+    dropoff_details: Optional[str] = None
 
     receiver_name: str
     receiver_phone: str
@@ -42,6 +44,11 @@ class StatusUpdate(BaseModel):
     note: Optional[str] = None
 
 
+class OrderRating(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    review: Optional[str] = None
+
+
 class StatusHistoryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -60,9 +67,11 @@ class OrderOut(BaseModel):
     pickup_address: str
     pickup_lat: float
     pickup_lng: float
+    pickup_details: Optional[str] = None
     dropoff_address: str
     dropoff_lat: float
     dropoff_lng: float
+    dropoff_details: Optional[str] = None
 
     receiver_name: str
     receiver_phone: str
@@ -78,6 +87,9 @@ class OrderOut(BaseModel):
     price: float
     payment_method: str
     status: OrderStatus
+
+    rating: Optional[int] = None
+    review: Optional[str] = None
 
     created_at: datetime
     updated_at: datetime

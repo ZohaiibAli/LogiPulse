@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import { useParams, Link } from "react-router-dom"
 import { toast } from "sonner"
-import { ArrowLeft, Loader2, Navigation, Package, Phone, User } from "lucide-react"
+import { ArrowLeft, Loader2, MapPin, Navigation, Package, Phone, User } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -121,6 +121,12 @@ export default function RiderOrderDetail() {
               <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <span>{order.receiver_phone}</span>
             </div>
+            {order.dropoff_details && (
+              <div className="flex items-start gap-2">
+                <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <span>{order.dropoff_details}</span>
+              </div>
+            )}
             {order.notes && (
               <div className="flex items-start gap-2">
                 <Navigation className="mt-0.5 h-4 w-4 text-muted-foreground" />

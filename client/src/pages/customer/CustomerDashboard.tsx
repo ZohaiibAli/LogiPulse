@@ -9,6 +9,7 @@ import { bucketByDay, countByStatus } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
 import TrendBarChart from "@/components/charts/TrendBarChart"
 import StatusBreakdownChart from "@/components/charts/StatusBreakdownChart"
+import RateDeliveryCard from "@/components/orders/RateDeliveryCard"
 
 export default function CustomerDashboard() {
   const { user } = useAuth()
@@ -23,6 +24,7 @@ export default function CustomerDashboard() {
   const bookingsSparkline = bookingsByDay.slice(-10).map((d) => d.value)
   const statusCounts = orders ? countByStatus(orders) : {}
   const hasOrders = (orders?.length ?? 0) > 0
+  const unratedDelivered = orders?.filter((o) => o.status === "delivered" && o.rating == null) ?? []
 
   const stats = [
     { label: "Active orders", value: active, icon: Truck, color: "bg-indigo-50 text-indigo-600" },
@@ -34,7 +36,7 @@ export default function CustomerDashboard() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold">Hi, {user?.full_name.split(" ")[0]} 👋</h1>
+          <h1 className="text-2xl font-extrabold">Hi, {user?.full_name.split(" ")[0]}</h1>
           <p className="text-sm text-muted-foreground">Here's what's happening with your deliveries.</p>
         </div>
         <Button asChild className="rounded-full bg-brand-gradient shadow-md shadow-indigo-500/30">
@@ -60,6 +62,14 @@ export default function CustomerDashboard() {
           </div>
         ))}
       </div>
+
+      {unratedDelivered.length > 0 && (
+        <div className="space-y-4">
+          {unratedDelivered.slice(0, 2).map((o) => (
+            <RateDeliveryCard key={o.id} order={o} />
+          ))}
+        </div>
+      )}
 
       {hasOrders && (
         <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">

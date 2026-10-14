@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 
@@ -10,7 +10,7 @@ from model.user import User, UserRole
 from model.order import Order, OrderStatus, OrderStatusHistory
 from model.rider import RiderProfile, RiderStatus
 from schemas.order import (
-    OrderCreate, OrderOut, StatusUpdate, OrderEstimate, OrderEstimateOut,
+    OrderCreate, OrderOut, StatusUpdate, OrderEstimate, OrderEstimateOut, OrderRating,
 )
 from ws.manager import manager
 
@@ -43,9 +43,11 @@ def create_order(
         pickup_address=payload.pickup_address,
         pickup_lat=payload.pickup_lat,
         pickup_lng=payload.pickup_lng,
+        pickup_details=payload.pickup_details,
         dropoff_address=payload.dropoff_address,
         dropoff_lat=payload.dropoff_lat,
         dropoff_lng=payload.dropoff_lng,
+        dropoff_details=payload.dropoff_details,
         receiver_name=payload.receiver_name,
         receiver_phone=payload.receiver_phone,
         package_type=payload.package_type,
@@ -225,5 +227,39 @@ def cancel_order(
     order.status = OrderStatus.cancelled
     _record_history(db, order, OrderStatus.cancelled, f"Cancelled by {current_user.full_name}")
     db.commit()
+    db.refresh(order)
+    return order
+
+
+@router.post("/{order_id}/rate", response_model=OrderOut)
+def rate_order(
+    order_id: int,
+    payload: OrderRating,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.customer)),
+):
+    order = _get_order_or_404(db, order_id)
+    if order.customer_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You can't rate this order")
+    if order.status != OrderStatus.delivered:
+        raise HTTPException(status_code=400, detail="You can only rate a delivered order")
+    if order.rating is not None:
+        raise HTTPException(status_code=400, detail="This order has already been rated")
+
+    order.rating = payload.rating
+    order.review = payload.review
+    db.commit()
+
+    if order.rider_id:
+        profile = db.query(RiderProfile).filter(RiderProfile.user_id == order.rider_id).first()
+        if profile:
+            avg = (
+                db.query(func.avg(Order.rating))
+                .filter(Order.rider_id == order.rider_id, Order.rating.isnot(None))
+                .scalar()
+            )
+            profile.rating = round(float(avg), 2) if avg is not None else profile.rating
+            db.commit()
+
     db.refresh(order)
     return order

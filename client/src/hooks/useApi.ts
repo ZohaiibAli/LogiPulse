@@ -70,6 +70,15 @@ export function useCancelOrder() {
   })
 }
 
+export function useRateOrder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ orderId, rating, review }: { orderId: number; rating: number; review?: string }) =>
+      (await api.post<Order>(`/orders/${orderId}/rate`, { rating, review })).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orders"] }),
+  })
+}
+
 // ---------- Rider ----------
 
 export function useRiderProfile() {
@@ -121,10 +130,12 @@ export function useAdminUsers(role?: UserRole) {
   })
 }
 
-export function usePendingRiders() {
+export function usePendingRiders(enabled = true) {
   return useQuery({
     queryKey: ["admin", "riders", "pending"],
     queryFn: async () => (await api.get<User[]>("/admin/riders/pending")).data,
+    enabled,
+    refetchInterval: enabled ? 20000 : false,
   })
 }
 
@@ -153,5 +164,27 @@ export function useSetUserActive() {
     mutationFn: async ({ userId, isActive }: { userId: number; isActive: boolean }) =>
       (await api.patch(`/admin/users/${userId}/active`, null, { params: { is_active: isActive } })).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "users"] }),
+  })
+}
+
+// ---------- Auth (password) ----------
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: async (payload: { current_password: string; new_password: string }) =>
+      (await api.patch("/auth/change-password", payload)).data,
+  })
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: async (email: string) => (await api.post("/auth/forgot-password", { email })).data,
+  })
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: async (payload: { token: string; new_password: string }) =>
+      (await api.post("/auth/reset-password", payload)).data,
   })
 }

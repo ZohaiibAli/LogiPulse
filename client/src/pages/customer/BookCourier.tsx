@@ -29,7 +29,9 @@ export default function BookCourier() {
   const { getLocation, loading: locating } = useCurrentLocation()
 
   const [pickup, setPickup] = useState<Point>({ address: "" })
+  const [pickupDetails, setPickupDetails] = useState("")
   const [dropoff, setDropoff] = useState<Point>({ address: "" })
+  const [dropoffDetails, setDropoffDetails] = useState("")
   const [receiverName, setReceiverName] = useState("")
   const [receiverPhone, setReceiverPhone] = useState("")
   const [packageType, setPackageType] = useState("parcel")
@@ -76,9 +78,11 @@ export default function BookCourier() {
         pickup_address: pickup.address,
         pickup_lat: pickup.lat,
         pickup_lng: pickup.lng,
+        pickup_details: pickupDetails || undefined,
         dropoff_address: dropoff.address,
         dropoff_lat: dropoff.lat,
         dropoff_lng: dropoff.lng,
+        dropoff_details: dropoffDetails || undefined,
         receiver_name: receiverName,
         receiver_phone: receiverPhone,
         package_type: packageType,
@@ -120,6 +124,11 @@ export default function BookCourier() {
                 onChange={(address) => setPickup((p) => ({ ...p, address }))}
                 onPlaceSelected={(address, lat, lng) => setPickup({ address, lat, lng })}
               />
+              <Input
+                value={pickupDetails}
+                onChange={(e) => setPickupDetails(e.target.value)}
+                placeholder="Flat/floor/block (optional) — e.g. Flat 3B, 2nd Floor, Block C"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Drop-off location</Label>
@@ -129,6 +138,11 @@ export default function BookCourier() {
                 icon={<Navigation className="h-4 w-4" />}
                 onChange={(address) => setDropoff((p) => ({ ...p, address }))}
                 onPlaceSelected={(address, lat, lng) => setDropoff({ address, lat, lng })}
+              />
+              <Input
+                value={dropoffDetails}
+                onChange={(e) => setDropoffDetails(e.target.value)}
+                placeholder="Receiver's flat/floor/block (optional)"
               />
             </div>
           </div>

@@ -35,10 +35,15 @@ class Order(Base):
     pickup_address = Column(String(500), nullable=False)
     pickup_lat = Column(Float, nullable=False)
     pickup_lng = Column(Float, nullable=False)
+    # Flat/floor/block detail for the sender's home address — descriptive only,
+    # never geocoded or shown on the map.
+    pickup_details = Column(String(255), nullable=True)
 
     dropoff_address = Column(String(500), nullable=False)
     dropoff_lat = Column(Float, nullable=False)
     dropoff_lng = Column(Float, nullable=False)
+    # Same, for the receiver's home address.
+    dropoff_details = Column(String(255), nullable=True)
 
     receiver_name = Column(String(120), nullable=False)
     receiver_phone = Column(String(30), nullable=False)
@@ -52,6 +57,10 @@ class Order(Base):
     payment_method = Column(String(30), default="cash")
 
     status = Column(Enum(OrderStatus), default=OrderStatus.pending, nullable=False)
+
+    # Customer's post-delivery rating/review of the rider for this specific order.
+    rating = Column(Integer, nullable=True)
+    review = Column(Text, nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

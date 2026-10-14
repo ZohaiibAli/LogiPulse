@@ -1,12 +1,13 @@
 import { useState, type ReactNode } from "react"
 import { NavLink, Outlet } from "react-router-dom"
-import { Menu, LogOut, Bell } from "lucide-react"
+import { Menu, LogOut } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { useAuth } from "@/contexts/AuthContext"
 import { cn, getInitials } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget"
 import ThemeToggle from "@/components/ThemeToggle"
+import NotificationsBell from "@/components/notifications/NotificationsBell"
 
 export interface NavItem {
   to: string
@@ -83,9 +84,7 @@ export default function DashboardShell({ navItems, roleLabel }: { navItems: NavI
           <div className="hidden lg:block" />
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <NotificationsBell />
           </div>
         </header>
 

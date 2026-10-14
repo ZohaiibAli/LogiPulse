@@ -43,6 +43,7 @@ def chat_with_bot(
                 config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
             )
             reply = response.text or "Sorry, I couldn't come up with a response. Please try again."
+            reply = reply.replace("*", "")
         except Exception as e:
             reply = f"The assistant is temporarily unavailable ({e})."
 
