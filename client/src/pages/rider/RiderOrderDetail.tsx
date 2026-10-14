@@ -132,12 +132,20 @@ export default function RiderOrderDetail() {
               <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <span>{order.receiver_phone}</span>
             </div>
-            {order.dropoff_details && (
-              <div className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                <span>{order.dropoff_details}</span>
-              </div>
-            )}
+            <div className="flex items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <span>
+                {order.pickup_address}
+                {order.pickup_details && ` — ${order.pickup_details}`}
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <span>
+                {order.dropoff_address}
+                {order.dropoff_details && ` — ${order.dropoff_details}`}
+              </span>
+            </div>
             {order.notes && (
               <div className="flex items-start gap-2">
                 <Navigation className="mt-0.5 h-4 w-4 text-muted-foreground" />

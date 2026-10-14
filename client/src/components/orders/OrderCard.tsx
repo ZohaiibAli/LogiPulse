@@ -35,11 +35,17 @@ export default function OrderCard({ order, to }: { order: Order; to: string }) {
       <div className="space-y-2 text-sm">
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-500" />
-          <span className="line-clamp-1 text-muted-foreground">{order.pickup_address}</span>
+          <span className="line-clamp-1 text-muted-foreground">
+            {order.pickup_address}
+            {order.pickup_details && <span className="text-foreground"> — {order.pickup_details}</span>}
+          </span>
         </div>
         <div className="flex items-start gap-2">
           <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-500" />
-          <span className="line-clamp-1 text-muted-foreground">{order.dropoff_address}</span>
+          <span className="line-clamp-1 text-muted-foreground">
+            {order.dropoff_address}
+            {order.dropoff_details && <span className="text-foreground"> — {order.dropoff_details}</span>}
+          </span>
         </div>
       </div>
 
