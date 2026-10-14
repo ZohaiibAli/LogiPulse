@@ -2,6 +2,7 @@ import { type ComponentType, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { PackageSearch, MapPin, MessageCircle, ShieldCheck, Bike, Wallet, Navigation, Users, BarChart3 } from "lucide-react"
 import { Logo } from "@/components/logo"
+import TruckScene from "@/components/illustrations/TruckScene"
 
 export interface AuthPanelContent {
   icon: ComponentType<{ className?: string }>
@@ -85,6 +86,14 @@ export default function AuthLayout({
               </li>
             ))}
           </ul>
+
+          <div className="relative mt-8 h-36 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
+            <TruckScene
+              className="absolute inset-0 h-full w-full overflow-visible"
+              trailerFill="rgba(255,255,255,0.06)"
+              roadColor="rgba(255,255,255,0.25)"
+            />
+          </div>
         </div>
 
         <p className="relative z-10 text-xs text-white/40">© {new Date().getFullYear()} LogiPulse</p>

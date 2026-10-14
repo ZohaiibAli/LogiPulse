@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import { ArrowRight, MapPin, Navigation, Package, Star } from "lucide-react"
+import { ArrowRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import TruckLoadingHero from "@/components/landing/TruckLoadingHero"
 
 const partners = ["QuickMart", "Daraz Express", "FoodieGo", "UrbanBox", "SwiftLogix"]
 
@@ -83,38 +84,7 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="card-glow relative z-10 rounded-[2rem] border border-white/60 bg-white p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <Navigation className="h-4 w-4 text-primary" /> Live Delivery Map
-              </span>
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-            </div>
-
-            <div className="relative h-56 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#eef1ff_0%,#f3eeff_100%)]">
-              <svg className="absolute inset-0 h-full w-full opacity-60" viewBox="0 0 300 200" fill="none">
-                <path d="M20 160 C 80 60, 160 180, 280 40" stroke="#5B4FE8" strokeWidth="3" strokeDasharray="8 8" strokeLinecap="round" />
-              </svg>
-              <span className="absolute left-4 top-[72%] flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg ring-4 ring-white">
-                <MapPin className="h-4 w-4" />
-              </span>
-              <span className="absolute right-6 top-[14%] flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg ring-4 ring-white">
-                <Package className="h-4 w-4" />
-              </span>
-              <span className="absolute left-[46%] top-[46%] flex h-6 w-6 items-center justify-center rounded-full bg-white text-indigo-600 shadow-md">
-                <Navigation className="h-3 w-3 animate-pulse" />
-              </span>
-            </div>
-
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              {[["120", "Deliveries"], ["10", "Riders online"], ["4.9", "Avg. rating"]].map(([num, label]) => (
-                <div key={label} className="rounded-xl bg-secondary/60 py-2">
-                  <p className="text-lg font-extrabold text-foreground">{num}</p>
-                  <p className="text-[10px] text-muted-foreground">{label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TruckLoadingHero />
         </motion.div>
       </div>
     </section>
