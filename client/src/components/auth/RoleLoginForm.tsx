@@ -33,11 +33,10 @@ interface Props {
   role: UserRole
   title: string
   subtitle: string
-  demoHint?: { email: string; password: string }
   showSignup?: boolean
 }
 
-export default function RoleLoginForm({ role, title, subtitle, demoHint, showSignup = true }: Props) {
+export default function RoleLoginForm({ role, title, subtitle, showSignup = true }: Props) {
   const { login, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -101,12 +100,6 @@ export default function RoleLoginForm({ role, title, subtitle, demoHint, showSig
 
       {showSignup && (
         <AuthFooterLink prompt="Don't have an account?" linkText="Sign up" to={`/register?role=${role}`} />
-      )}
-
-      {demoHint && (
-        <div className="mt-6 rounded-xl border border-dashed border-indigo-200 bg-secondary/40 p-3 text-center text-xs text-muted-foreground">
-          Demo login: <span className="font-semibold">{demoHint.email}</span> / <span className="font-semibold">{demoHint.password}</span>
-        </div>
       )}
 
       <p className="mt-4 text-center text-xs text-muted-foreground">

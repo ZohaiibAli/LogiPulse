@@ -6,7 +6,6 @@ export default function AdminLogin() {
       role="admin"
       title="Admin login"
       subtitle="Sign in to manage LogiPulse's platform."
-      demoHint={{ email: "admin@logipulse.com", password: "admin12345" }}
       showSignup={false}
     />
   )
