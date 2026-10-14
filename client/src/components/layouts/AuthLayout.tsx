@@ -2,12 +2,15 @@ import { type ComponentType, type ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { PackageSearch, MapPin, MessageCircle, ShieldCheck, Bike, Wallet, Navigation, Users, BarChart3 } from "lucide-react"
 import { Logo } from "@/components/logo"
-import TruckScene from "@/components/illustrations/TruckScene"
+import BikeScene from "@/components/illustrations/BikeScene"
+import AdminScene from "@/components/illustrations/AdminScene"
+import CustomerScene from "@/components/illustrations/CustomerScene"
 
 export interface AuthPanelContent {
   icon: ComponentType<{ className?: string }>
   heading: ReactNode
   perks: { icon: ComponentType<{ className?: string }>; text: string }[]
+  scene: ComponentType<{ className?: string }>
 }
 
 export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelContent> = {
@@ -23,6 +26,7 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
       { icon: MessageCircle, text: "Direct chat with your rider + AI assistant" },
       { icon: ShieldCheck, text: "Riders verified by our admin team" },
     ],
+    scene: CustomerScene,
   },
   rider: {
     icon: Bike,
@@ -36,6 +40,7 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
       { icon: Wallet, text: "Track earnings after every delivery" },
       { icon: MessageCircle, text: "Direct chat with customers" },
     ],
+    scene: BikeScene,
   },
   admin: {
     icon: ShieldCheck,
@@ -49,6 +54,7 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
       { icon: BarChart3, text: "Platform-wide stats & revenue" },
       { icon: MapPin, text: "Full visibility into every order" },
     ],
+    scene: AdminScene,
   },
 }
 
@@ -64,6 +70,7 @@ export default function AuthLayout({
   children: ReactNode
 }) {
   const PanelIcon = panel.icon
+  const PanelScene = panel.scene
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -88,11 +95,7 @@ export default function AuthLayout({
           </ul>
 
           <div className="relative mt-8 h-36 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
-            <TruckScene
-              className="absolute inset-0 h-full w-full overflow-visible"
-              trailerFill="rgba(255,255,255,0.06)"
-              roadColor="rgba(255,255,255,0.25)"
-            />
+            <PanelScene className="absolute inset-0 h-full w-full overflow-visible" />
           </div>
         </div>
 
