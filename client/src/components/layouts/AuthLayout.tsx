@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { MapPin, MessageCircle, ShieldCheck, Wallet, Navigation, Users, BarChart3 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import BikeLottie from "@/components/illustrations/BikeLottie"
-import AdminScene from "@/components/illustrations/AdminScene"
+import AdminLottie from "@/components/illustrations/AdminLottie"
 import OrderLottie from "@/components/illustrations/OrderLottie"
 
 export interface AuthPanelContent {
@@ -50,7 +50,7 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
       { icon: BarChart3, text: "Platform-wide stats & revenue" },
       { icon: MapPin, text: "Full visibility into every order" },
     ],
-    scene: AdminScene,
+    scene: AdminLottie,
   },
 }
 
@@ -69,7 +69,7 @@ export default function AuthLayout({
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-navy-gradient p-10 text-white lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-navy-gradient p-10 text-white lg:sticky lg:top-0 lg:flex lg:h-screen">
         <div className="pointer-events-none absolute -right-20 top-20 h-72 w-72 rounded-full bg-violet-600/30 blur-3xl" />
         <div className="pointer-events-none absolute -left-10 bottom-10 h-72 w-72 rounded-full bg-indigo-600/20 blur-3xl" />
 
