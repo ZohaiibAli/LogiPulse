@@ -1,13 +1,12 @@
 import { type ComponentType, type ReactNode } from "react"
 import { Link } from "react-router-dom"
-import { PackageSearch, MapPin, MessageCircle, ShieldCheck, Bike, Wallet, Navigation, Users, BarChart3 } from "lucide-react"
+import { MapPin, MessageCircle, ShieldCheck, Wallet, Navigation, Users, BarChart3 } from "lucide-react"
 import { Logo } from "@/components/logo"
-import BikeScene from "@/components/illustrations/BikeScene"
+import BikeLottie from "@/components/illustrations/BikeLottie"
 import AdminScene from "@/components/illustrations/AdminScene"
 import CustomerScene from "@/components/illustrations/CustomerScene"
 
 export interface AuthPanelContent {
-  icon: ComponentType<{ className?: string }>
   heading: ReactNode
   perks: { icon: ComponentType<{ className?: string }>; text: string }[]
   scene: ComponentType<{ className?: string }>
@@ -15,7 +14,6 @@ export interface AuthPanelContent {
 
 export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelContent> = {
   customer: {
-    icon: PackageSearch,
     heading: (
       <>
         Courier delivery, <span className="accent-italic text-violet-300">reimagined.</span>
@@ -29,7 +27,6 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
     scene: CustomerScene,
   },
   rider: {
-    icon: Bike,
     heading: (
       <>
         Earn on <span className="accent-italic text-violet-300">your own schedule.</span>
@@ -40,10 +37,9 @@ export const AUTH_PANELS: Record<"customer" | "rider" | "admin", AuthPanelConten
       { icon: Wallet, text: "Track earnings after every delivery" },
       { icon: MessageCircle, text: "Direct chat with customers" },
     ],
-    scene: BikeScene,
+    scene: BikeLottie,
   },
   admin: {
-    icon: ShieldCheck,
     heading: (
       <>
         Run the <span className="accent-italic text-violet-300">whole operation.</span>
@@ -69,7 +65,6 @@ export default function AuthLayout({
   panel?: AuthPanelContent
   children: ReactNode
 }) {
-  const PanelIcon = panel.icon
   const PanelScene = panel.scene
 
   return (
@@ -81,9 +76,6 @@ export default function AuthLayout({
         <Logo dark />
 
         <div className="relative z-10 max-w-sm">
-          <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-gradient">
-            <PanelIcon className="h-6 w-6" />
-          </span>
           <h2 className="mb-4 text-3xl font-extrabold leading-tight">{panel.heading}</h2>
           <ul className="space-y-4">
             {panel.perks.map((p) => (
@@ -94,9 +86,7 @@ export default function AuthLayout({
             ))}
           </ul>
 
-          <div className="relative mt-8 h-36 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
-            <PanelScene className="absolute inset-0 h-full w-full overflow-visible" />
-          </div>
+          <PanelScene className="relative mt-6 h-64 w-full overflow-visible" />
         </div>
 
         <p className="relative z-10 text-xs text-white/40">© {new Date().getFullYear()} LogiPulse</p>
