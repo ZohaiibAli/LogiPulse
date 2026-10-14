@@ -1,10 +1,12 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from model.order import OrderStatus, PackageType
 from schemas.user import UserOut
+
+OrderPriority = Literal["normal", "high", "urgent"]
 
 
 class OrderCreate(BaseModel):
@@ -25,6 +27,7 @@ class OrderCreate(BaseModel):
     package_weight: Optional[float] = None
     notes: Optional[str] = None
     payment_method: str = "cash"
+    priority: OrderPriority = "normal"
 
 
 class OrderEstimate(BaseModel):
@@ -32,11 +35,13 @@ class OrderEstimate(BaseModel):
     pickup_lng: float
     dropoff_lat: float
     dropoff_lng: float
+    priority: OrderPriority = "normal"
 
 
 class OrderEstimateOut(BaseModel):
     distance_km: float
     price: float
+    priority_fee: float
 
 
 class StatusUpdate(BaseModel):
@@ -87,6 +92,9 @@ class OrderOut(BaseModel):
     price: float
     payment_method: str
     status: OrderStatus
+
+    priority: OrderPriority = "normal"
+    priority_fee: float = 0
 
     rating: Optional[int] = None
     review: Optional[str] = None

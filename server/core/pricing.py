@@ -17,3 +17,18 @@ def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
 def estimate_price(distance_km: float) -> float:
     price = settings.BASE_FARE + distance_km * settings.RATE_PER_KM
     return round(price, 2)
+
+
+PRIORITY_FEES = {
+    "normal": settings.PRIORITY_FEE_NORMAL,
+    "high": settings.PRIORITY_FEE_HIGH,
+    "urgent": settings.PRIORITY_FEE_URGENT,
+}
+
+# Highest urgency first — used to sort the rider's available-orders feed
+# when they choose to weigh priority over raw distance.
+PRIORITY_RANK = {"urgent": 0, "high": 1, "normal": 2}
+
+
+def priority_fee(priority: str) -> float:
+    return PRIORITY_FEES.get(priority, PRIORITY_FEES["normal"])

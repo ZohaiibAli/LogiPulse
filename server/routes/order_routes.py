@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 
 from config.db import get_db
 from core.deps import get_current_user, require_roles
-from core.pricing import haversine_km, estimate_price
+from core.pricing import haversine_km, estimate_price, priority_fee, PRIORITY_RANK
 from model.user import User, UserRole
 from model.order import Order, OrderStatus, OrderStatusHistory
 from model.rider import RiderProfile, RiderStatus
@@ -26,7 +26,12 @@ def estimate(payload: OrderEstimate, current_user: User = Depends(get_current_us
     distance_km = haversine_km(
         payload.pickup_lat, payload.pickup_lng, payload.dropoff_lat, payload.dropoff_lng
     )
-    return OrderEstimateOut(distance_km=round(distance_km, 2), price=estimate_price(distance_km))
+    fee = priority_fee(payload.priority)
+    return OrderEstimateOut(
+        distance_km=round(distance_km, 2),
+        price=estimate_price(distance_km) + fee,
+        priority_fee=fee,
+    )
 
 
 @router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
@@ -38,6 +43,7 @@ def create_order(
     distance_km = haversine_km(
         payload.pickup_lat, payload.pickup_lng, payload.dropoff_lat, payload.dropoff_lng
     )
+    fee = priority_fee(payload.priority)
     order = Order(
         customer_id=current_user.id,
         pickup_address=payload.pickup_address,
@@ -55,7 +61,9 @@ def create_order(
         notes=payload.notes,
         payment_method=payload.payment_method,
         distance_km=round(distance_km, 2),
-        price=estimate_price(distance_km),
+        price=estimate_price(distance_km) + fee,
+        priority=payload.priority,
+        priority_fee=fee,
         status=OrderStatus.pending,
     )
     db.add(order)
@@ -82,21 +90,24 @@ def my_orders(
 
 @router.get("/available", response_model=list[OrderOut])
 def available_orders(
+    priority: str | None = Query(None, description="Filter to one priority: normal, high, or urgent"),
+    sort_by: str = Query("distance", description="'distance' (nearest first) or 'priority' (urgent first)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.rider)),
 ):
     """Pending orders with no rider yet — the InDrive-style request feed.
 
-    Sorted nearest-first by the real haversine distance from the rider's
-    current (live-tracked) position to each order's pickup point — not a
-    hardcoded label and not the order's own pickup->dropoff trip distance.
+    Sorted nearest-first by default, using the real haversine distance from
+    the rider's current (live-tracked) position to each order's pickup point
+    — not a hardcoded label and not the order's own pickup->dropoff trip
+    distance. Riders can also filter by priority and/or re-sort by priority
+    (Day-2 "Peak Hours" feature) so they can weigh both distance and urgency
+    themselves.
     """
-    orders = (
-        db.query(Order)
-        .filter(Order.status == OrderStatus.pending, Order.rider_id.is_(None))
-        .order_by(Order.created_at.desc())
-        .all()
-    )
+    query = db.query(Order).filter(Order.status == OrderStatus.pending, Order.rider_id.is_(None))
+    if priority:
+        query = query.filter(Order.priority == priority)
+    orders = query.order_by(Order.created_at.desc()).all()
 
     profile = db.query(RiderProfile).filter(RiderProfile.user_id == current_user.id).first()
 
@@ -105,10 +116,19 @@ def available_orders(
             order.distance_from_rider_km = round(
                 haversine_km(profile.current_lat, profile.current_lng, order.pickup_lat, order.pickup_lng), 2
             )
-        orders.sort(key=lambda o: o.distance_from_rider_km)
+        has_distance = True
     else:
         for order in orders:
             order.distance_from_rider_km = None
+        has_distance = False
+
+    if sort_by == "priority":
+        orders.sort(key=lambda o: (
+            PRIORITY_RANK.get(o.priority, 9),
+            o.distance_from_rider_km if has_distance else 0,
+        ))
+    elif has_distance:
+        orders.sort(key=lambda o: o.distance_from_rider_km)
 
     return orders
 

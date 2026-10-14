@@ -34,5 +34,12 @@ class Settings:
     BASE_FARE: float = float(os.getenv("BASE_FARE", 120))
     RATE_PER_KM: float = float(os.getenv("RATE_PER_KM", 45))
 
+    # Day-2 "Peak Hours" priority delivery surcharge, added on top of the base
+    # fare+distance price. Every order carries a priority (even "normal"),
+    # so there's always a handling fee, not just a surcharge above a free tier.
+    PRIORITY_FEE_NORMAL: float = float(os.getenv("PRIORITY_FEE_NORMAL", 200))
+    PRIORITY_FEE_HIGH: float = float(os.getenv("PRIORITY_FEE_HIGH", 300))
+    PRIORITY_FEE_URGENT: float = float(os.getenv("PRIORITY_FEE_URGENT", 500))
+
 
 settings = Settings()

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import { useParams, Link } from "react-router-dom"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
-import { ArrowLeft, Loader2, MapPin, Navigation, Package, Phone, User } from "lucide-react"
+import { ArrowLeft, Loader2, MapPin, Navigation, Package, Phone, User, Zap } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import ChatPanel from "@/components/chat/ChatPanel"
 import { useOrder, useUpdateOrderStatus } from "@/hooks/useApi"
 import { useOrderConversation } from "@/hooks/useOrderConversation"
 import { formatCurrency, ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, cn } from "@/lib/utils"
+import { PRIORITY_LABEL, PRIORITY_COLOR } from "@/lib/priority"
 import { getErrorMessage } from "@/lib/api"
 import type { OrderStatus } from "@/types"
 
@@ -86,6 +87,10 @@ export default function RiderOrderDetail() {
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={cn("border px-3 py-1 text-sm", ORDER_STATUS_COLOR[order.status])}>
             {ORDER_STATUS_LABEL[order.status]}
+          </Badge>
+          <Badge variant="outline" className={cn("gap-1 border px-3 py-1 text-sm", PRIORITY_COLOR[order.priority])}>
+            {order.priority !== "normal" && <Zap className="h-3.5 w-3.5" />}
+            {PRIORITY_LABEL[order.priority]}
           </Badge>
           {action && (
             <Button onClick={handleAdvance} disabled={updateStatus.isPending} className="rounded-full bg-brand-gradient">

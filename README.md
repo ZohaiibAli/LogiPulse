@@ -133,3 +133,31 @@ hardcoded label.
   the rider to enable location — it never fabricates a distance.
 - The same haversine formula also drives fare pricing (`POST /orders/estimate`), so pricing
   and nearby-sorting both work correctly independent of the map provider.
+
+## Day 2 Priority Feature — "Peak Hours: The Priority Delivery System"
+
+Every order carries one of three priorities — **Normal, High, or Urgent** — added directly
+into the existing order flow (not a separate dashboard), covering all four Day-2 requirements:
+
+1. **Priority display.** The customer picks a priority when booking (`BookCourier.tsx`),
+   each level carrying its own handling fee (Normal Rs 200, High Rs 300, Urgent Rs 500 —
+   `server/core/pricing.py::priority_fee`), added into the order's total price server-side.
+   Every order card, list row, and detail page shows a colored priority badge — Normal is
+   neutral/quiet, High and Urgent are visually highlighted (amber / rose), never color-only
+   since the text label always ships with it.
+2. **Filtering.** Both the Rider's "Available requests" feed (`GET /orders/available?priority=`)
+   and the Admin's order table (`AdminOrders.tsx`, filtered client-side since Admin already
+   holds the full order list) can be filtered to one priority at a time.
+3. **Rider decision.** The rider sees both the live haversine distance *and* the priority
+   badge on every request, and can toggle the sort between "Nearest" (default, the Smart
+   Nearby Pickup distance sort) and "Priority" (urgent-first, `sort_by=priority` on
+   `GET /orders/available`) — so distance and urgency are both visible and actionable,
+   matching the brief's "can consider both" wording rather than silently overriding one
+   with the other.
+4. **Admin analytics.** `GET /admin/stats` returns live `priority_counts` (grouped `COUNT`
+   query over `orders.priority`), rendered as a 3-tile "Priority breakdown · Live" card on
+   `AdminDashboard.tsx` that updates on the dashboard's existing refetch interval — no
+   manual refresh needed.
+
+`orders.priority` / `orders.priority_fee` are plain columns (not a DB-level enum) added via
+`server/migrate_add_priority.py`, validated at the Pydantic layer (`schemas/order.py`).

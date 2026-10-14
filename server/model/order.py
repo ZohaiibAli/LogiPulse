@@ -56,6 +56,12 @@ class Order(Base):
     price = Column(Float, nullable=False)
     payment_method = Column(String(30), default="cash")
 
+    # Day-2 "Peak Hours" priority delivery system — "normal" | "high" | "urgent".
+    # Plain string (not a DB enum) so it can be added to the existing table with
+    # a simple ALTER TABLE, validated at the Pydantic layer instead.
+    priority = Column(String(10), default="normal", nullable=False)
+    priority_fee = Column(Float, default=200.0, nullable=False)
+
     status = Column(Enum(OrderStatus), default=OrderStatus.pending, nullable=False)
 
     # Customer's post-delivery rating/review of the rider for this specific order.

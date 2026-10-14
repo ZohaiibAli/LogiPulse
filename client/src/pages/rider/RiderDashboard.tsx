@@ -2,21 +2,24 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
-import { Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed, Wallet, PackageCheck } from "lucide-react"
+import { Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed, Wallet, PackageCheck, Zap, ArrowDownUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   useRiderProfile, useToggleOnline, useAvailableOrders, useAcceptOrder, useMyOrders,
   useUpdateRiderLocation,
 } from "@/hooks/useApi"
 import { useAuth } from "@/contexts/AuthContext"
-import { formatCurrency, formatDate } from "@/lib/utils"
+import { formatCurrency, formatDate, cn } from "@/lib/utils"
+import { PRIORITY_ORDER, PRIORITY_LABEL, PRIORITY_COLOR } from "@/lib/priority"
 import { getErrorMessage } from "@/lib/api"
 import { bucketByDay } from "@/lib/chartData"
 import Sparkline from "@/components/charts/Sparkline"
 import VehicleTrendChart from "@/components/charts/VehicleTrendChart"
 import RiderHero from "@/components/rider/RiderHero"
+import type { OrderPriority } from "@/types"
 
 // Visual tiering for the "nearest first" distance badge/bar — purely cosmetic,
 // the actual sort order always comes from the server's haversine calculation.
@@ -32,7 +35,9 @@ export default function RiderDashboard() {
   const { user } = useAuth()
   const { data: profile, isLoading: profileLoading } = useRiderProfile()
   const toggleOnline = useToggleOnline()
-  const { data: available, isLoading: availableLoading } = useAvailableOrders()
+  const [priorityFilter, setPriorityFilter] = useState<OrderPriority | "all">("all")
+  const [sortBy, setSortBy] = useState<"distance" | "priority">("distance")
+  const { data: available, isLoading: availableLoading } = useAvailableOrders(priorityFilter, sortBy)
   const { data: myOrders } = useMyOrders()
   const acceptOrder = useAcceptOrder()
   const updateLocation = useUpdateRiderLocation()
@@ -193,20 +198,52 @@ export default function RiderDashboard() {
       )}
 
       <div>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-bold">Available requests</h2>
           {profile?.is_online && available && available.length > 0 && (
-            available[0].distance_from_rider_km != null ? (
+            sortBy === "distance" && available[0].distance_from_rider_km != null ? (
               <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
                 <LocateFixed className="h-3 w-3" /> Sorted nearest first
               </span>
-            ) : (
+            ) : sortBy === "distance" ? (
               <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                 <MapPin className="h-3 w-3" /> Enable location for nearby sorting
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
+                <Zap className="h-3 w-3" /> Sorted urgent first
               </span>
             )
           )}
         </div>
+
+        {profile?.is_online && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5 rounded-full border bg-card p-1">
+              {(["all", ...PRIORITY_ORDER] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPriorityFilter(p)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                    priorityFilter === p ? "bg-brand-gradient text-white" : "text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  {p === "all" ? "All" : PRIORITY_LABEL[p]}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setSortBy((s) => (s === "distance" ? "priority" : "distance"))}
+              className="flex items-center gap-1.5 rounded-full border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary"
+            >
+              <ArrowDownUp className="h-3 w-3" />
+              Sort: {sortBy === "distance" ? "Nearest" : "Priority"}
+            </button>
+          </div>
+        )}
 
         {!profile?.is_online ? (
           <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
@@ -234,7 +271,13 @@ export default function RiderDashboard() {
                 >
                   <div className="flex-1 space-y-1.5">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-semibold">Order #{o.id}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold">Order #{o.id}</span>
+                        <Badge variant="outline" className={cn("gap-1 border text-[10px]", PRIORITY_COLOR[o.priority])}>
+                          {o.priority !== "normal" && <Zap className="h-2.5 w-2.5" />}
+                          {PRIORITY_LABEL[o.priority]}
+                        </Badge>
+                      </div>
                       {tier && (
                         <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${tier.chip}`}>
                           {tier.km.toFixed(1)} km away

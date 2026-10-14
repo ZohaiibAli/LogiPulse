@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import type {
-  Order, OrderEstimate, User, AdminStats, ChatMessage, RiderProfile, UserRole, OnlineRider,
+  Order, OrderEstimate, User, AdminStats, ChatMessage, RiderProfile, UserRole, OnlineRider, OrderPriority,
 } from "@/types"
 
 // ---------- Orders ----------
@@ -22,17 +22,27 @@ export function useOrder(orderId?: number) {
   })
 }
 
-export function useAvailableOrders() {
+export function useAvailableOrders(priority?: OrderPriority | "all", sortBy: "distance" | "priority" = "distance") {
   return useQuery({
-    queryKey: ["orders", "available"],
-    queryFn: async () => (await api.get<Order[]>("/orders/available")).data,
+    queryKey: ["orders", "available", priority, sortBy],
+    queryFn: async () =>
+      (
+        await api.get<Order[]>("/orders/available", {
+          params: {
+            ...(priority && priority !== "all" ? { priority } : {}),
+            sort_by: sortBy,
+          },
+        })
+      ).data,
     refetchInterval: 8000,
   })
 }
 
 export function useEstimate() {
   return useMutation({
-    mutationFn: async (payload: { pickup_lat: number; pickup_lng: number; dropoff_lat: number; dropoff_lng: number }) =>
+    mutationFn: async (payload: {
+      pickup_lat: number; pickup_lng: number; dropoff_lat: number; dropoff_lng: number; priority: OrderPriority
+    }) =>
       (await api.post<OrderEstimate>("/orders/estimate", payload)).data,
   })
 }

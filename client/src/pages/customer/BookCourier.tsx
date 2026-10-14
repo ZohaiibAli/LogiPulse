@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { MapPin, Package, Loader2, Navigation, LocateFixed } from "lucide-react"
+import { MapPin, Package, Loader2, Navigation, LocateFixed, Zap } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,8 +13,10 @@ import RouteMap from "@/components/maps/RouteMap"
 import { useCreateOrder, useEstimate } from "@/hooks/useApi"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
 import { reverseGeocode } from "@/lib/nominatim"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
+import { PRIORITY_ORDER, PRIORITY_LABEL, PRIORITY_FEE } from "@/lib/priority"
 import { getErrorMessage as apiError } from "@/lib/api"
+import type { OrderPriority } from "@/types"
 
 interface Point {
   address: string
@@ -37,6 +39,7 @@ export default function BookCourier() {
   const [packageType, setPackageType] = useState("parcel")
   const [weight, setWeight] = useState("")
   const [notes, setNotes] = useState("")
+  const [priority, setPriority] = useState<OrderPriority>("normal")
 
   const ready = pickup.lat && pickup.lng && dropoff.lat && dropoff.lng
 
@@ -47,10 +50,11 @@ export default function BookCourier() {
         pickup_lng: pickup.lng,
         dropoff_lat: dropoff.lat,
         dropoff_lng: dropoff.lng,
+        priority,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickup.lat, pickup.lng, dropoff.lat, dropoff.lng])
+  }, [pickup.lat, pickup.lng, dropoff.lat, dropoff.lng, priority])
 
   const handleUseCurrentLocation = async () => {
     try {
@@ -88,6 +92,7 @@ export default function BookCourier() {
         package_type: packageType,
         package_weight: weight ? Number(weight) : undefined,
         notes: notes || undefined,
+        priority,
       })
       toast.success("Order placed — finding you a rider!")
       navigate(`/app/orders/${order.id}`)
@@ -183,6 +188,29 @@ export default function BookCourier() {
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Handle with care, call on arrival, etc." />
           </div>
 
+          <div className="space-y-1.5">
+            <Label>Delivery priority</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {PRIORITY_ORDER.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPriority(p)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
+                    priority === p
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-input text-muted-foreground hover:bg-secondary"
+                  )}
+                >
+                  {p !== "normal" && <Zap className="h-3.5 w-3.5" />}
+                  {PRIORITY_LABEL[p]}
+                  <span className="text-xs font-normal">+{formatCurrency(PRIORITY_FEE[p])}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <Button type="submit" className="h-12 w-full rounded-full bg-brand-gradient text-base" disabled={createOrder.isPending}>
             {createOrder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Confirm booking {estimate.data && `· ${formatCurrency(estimate.data.price)}`}
@@ -205,6 +233,7 @@ export default function BookCourier() {
             ) : estimate.data ? (
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Distance</span><span>{estimate.data.distance_km} km</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Priority fee ({PRIORITY_LABEL[priority]})</span><span>{formatCurrency(estimate.data.priority_fee)}</span></div>
                 <div className="flex justify-between text-base font-bold"><span>Estimated price</span><span>{formatCurrency(estimate.data.price)}</span></div>
               </div>
             ) : (

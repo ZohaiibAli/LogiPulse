@@ -12,6 +12,8 @@ export type OrderStatus =
 
 export type PackageType = "document" | "parcel" | "fragile" | "food" | "other"
 
+export type OrderPriority = "normal" | "high" | "urgent"
+
 export interface RiderProfile {
   vehicle_type: string
   vehicle_number?: string | null
@@ -70,6 +72,8 @@ export interface Order {
   price: number
   payment_method: string
   status: OrderStatus
+  priority: OrderPriority
+  priority_fee: number
   rating?: number | null
   review?: string | null
   created_at: string
@@ -81,6 +85,7 @@ export interface Order {
 export interface OrderEstimate {
   distance_km: number
   price: number
+  priority_fee: number
 }
 
 export interface ChatMessage {
@@ -99,6 +104,7 @@ export interface AdminStats {
   active_orders: number
   delivered_orders: number
   revenue: number
+  priority_counts: Record<OrderPriority, number>
 }
 
 export interface OnlineRider {

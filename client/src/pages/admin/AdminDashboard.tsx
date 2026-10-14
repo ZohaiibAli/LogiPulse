@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom"
-import { Users, Bike, Package, Wallet, Activity, CheckCircle2, ArrowRight, TrendingUp, PieChart } from "lucide-react"
+import { Users, Bike, Package, Wallet, Activity, CheckCircle2, ArrowRight, TrendingUp, PieChart, Zap } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { useAdminStats, usePendingRiders, useMyOrders } from "@/hooks/useApi"
-import { formatCurrency, getInitials } from "@/lib/utils"
+import { cn, formatCurrency, getInitials } from "@/lib/utils"
 import { bucketByDay, countByStatus } from "@/lib/chartData"
+import { PRIORITY_ORDER, PRIORITY_LABEL, PRIORITY_COLOR } from "@/lib/priority"
 import Sparkline from "@/components/charts/Sparkline"
 import VehicleTrendChart from "@/components/charts/VehicleTrendChart"
 import StatusBreakdownChart from "@/components/charts/StatusBreakdownChart"
@@ -80,6 +82,30 @@ export default function AdminDashboard() {
           </div>
           {orders ? <StatusBreakdownChart counts={statusCounts} /> : <Skeleton className="h-[180px] w-full" />}
         </div>
+      </div>
+
+      <div className="rounded-2xl border bg-card p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Zap className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-bold">Priority breakdown</h2>
+          <Badge variant="outline" className="ml-auto border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400">
+            Live
+          </Badge>
+        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {PRIORITY_ORDER.map((p) => (
+              <div key={p} className={cn("rounded-xl border p-4 text-center", PRIORITY_COLOR[p])}>
+                <p className="text-2xl font-extrabold">{stats?.priority_counts?.[p] ?? 0}</p>
+                <p className="text-xs font-semibold">{PRIORITY_LABEL[p]}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl border bg-card p-5">

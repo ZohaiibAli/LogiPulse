@@ -33,6 +33,12 @@ def stats(db: Session = Depends(get_db), _: User = Depends(admin_only)):
         .scalar()
     )
 
+    priority_rows = db.query(Order.priority, func.count(Order.id)).group_by(Order.priority).all()
+    priority_counts = {"normal": 0, "high": 0, "urgent": 0}
+    for p, count in priority_rows:
+        if p in priority_counts:
+            priority_counts[p] = count
+
     return {
         "total_customers": total_users,
         "total_riders": total_riders,
@@ -41,6 +47,7 @@ def stats(db: Session = Depends(get_db), _: User = Depends(admin_only)):
         "active_orders": active_orders,
         "delivered_orders": delivered_orders,
         "revenue": float(revenue or 0),
+        "priority_counts": priority_counts,
     }
 
 

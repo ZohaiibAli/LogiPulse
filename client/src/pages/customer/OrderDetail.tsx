@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom"
-import { ArrowLeft, MapPin, Package, Phone, User, Wallet, Loader2, X } from "lucide-react"
+import { ArrowLeft, MapPin, Package, Phone, User, Wallet, Loader2, X, Zap } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,7 @@ import { useOrder, useCancelOrder } from "@/hooks/useApi"
 import { useOrderConversation } from "@/hooks/useOrderConversation"
 import { useAuth } from "@/contexts/AuthContext"
 import { formatCurrency, formatDate, ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, cn } from "@/lib/utils"
+import { PRIORITY_LABEL, PRIORITY_COLOR } from "@/lib/priority"
 import { getErrorMessage } from "@/lib/api"
 
 export default function OrderDetail() {
@@ -57,6 +58,10 @@ export default function OrderDetail() {
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={cn("border px-3 py-1 text-sm", ORDER_STATUS_COLOR[order.status])}>
             {ORDER_STATUS_LABEL[order.status]}
+          </Badge>
+          <Badge variant="outline" className={cn("gap-1 border px-3 py-1 text-sm", PRIORITY_COLOR[order.priority])}>
+            {order.priority !== "normal" && <Zap className="h-3.5 w-3.5" />}
+            {PRIORITY_LABEL[order.priority]}
           </Badge>
           {canCancel && (
             <Button variant="outline" size="sm" className="rounded-full" onClick={handleCancel} disabled={cancelOrder.isPending}>
@@ -109,6 +114,10 @@ export default function OrderDetail() {
               <div className="flex items-start gap-2">
                 <Wallet className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <span className="capitalize">{order.payment_method} · {formatCurrency(order.price)}</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Zap className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <span>{PRIORITY_LABEL[order.priority]} priority fee · {formatCurrency(order.priority_fee)}</span>
               </div>
             </div>
 

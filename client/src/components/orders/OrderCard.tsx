@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom"
-import { MapPin, Package, ArrowRight } from "lucide-react"
+import { MapPin, Package, ArrowRight, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate, ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, cn } from "@/lib/utils"
+import { PRIORITY_COLOR, PRIORITY_LABEL } from "@/lib/priority"
 import type { Order } from "@/types"
 
 export default function OrderCard({ order, to }: { order: Order; to: string }) {
@@ -20,9 +21,15 @@ export default function OrderCard({ order, to }: { order: Order; to: string }) {
             <p className="text-xs text-muted-foreground">{formatDate(order.created_at)}</p>
           </div>
         </div>
-        <Badge variant="outline" className={cn("shrink-0 border", ORDER_STATUS_COLOR[order.status])}>
-          {ORDER_STATUS_LABEL[order.status]}
-        </Badge>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <Badge variant="outline" className={cn("border", ORDER_STATUS_COLOR[order.status])}>
+            {ORDER_STATUS_LABEL[order.status]}
+          </Badge>
+          <Badge variant="outline" className={cn("gap-1 border", PRIORITY_COLOR[order.priority])}>
+            {order.priority !== "normal" && <Zap className="h-3 w-3" />}
+            {PRIORITY_LABEL[order.priority]}
+          </Badge>
+        </div>
       </div>
 
       <div className="space-y-2 text-sm">
