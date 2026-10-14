@@ -63,8 +63,54 @@ Runs at `http://localhost:5173`.
 | `VITE_WS_URL` | yes | defaults derived from `VITE_API_URL` |
 | `VITE_GOOGLE_MAPS_API_KEY` | for maps | enable **Maps JavaScript API**, **Places API**, and **Directions API** on the same key in Google Cloud Console (free $200/month credit covers typical hackathon usage). Without it, the app still runs fully — map widgets fall back to a styled placeholder. |
 
-## Roles
+## Architecture: three connected dashboards, one shared system
 
-- **Customer** — books couriers, tracks live, chats with rider, uses the AI assistant.
-- **Rider** — registers (needs admin approval), goes online, accepts requests from a live feed, updates delivery status, shares live location.
-- **Admin** — approves/rejects riders, manages users, views all orders and platform stats. Demo login is created by `seed_admin.py`.
+Customer, Rider and Admin are not separate apps — they're three role-scoped views over the
+same PostgreSQL tables (`users`, `rider_profiles`, `orders`, `order_status_history`,
+`chat_messages`), so an action in one dashboard is immediately visible in the others
+through the same REST/WebSocket API:
+
+| Role | Can do |
+|---|---|
+| **Customer** | Request a courier, track their own orders live, see the assigned rider, chat with them, use the AI assistant |
+| **Rider** | Registers (needs admin approval), goes online, sees available requests **sorted nearest-first**, accepts one, updates status, shares live location |
+| **Admin** | Approves/rejects riders, manages users, monitors every order, views platform-wide stats, sees a live map of online riders |
+
+**The connected order flow** (`client/src/pages/**`, `server/routes/order_routes.py`,
+`server/routes/chat_routes.py`):
+
+1. Customer submits a request → `POST /orders` → row created with `status = pending`.
+2. It instantly appears to **both** Admin (`/admin/orders`, sees every order) and every
+   online Rider (`GET /orders/available`, pending + unassigned only).
+3. A rider accepts → `POST /orders/{id}/accept` → `rider_id` set, `status = accepted`,
+   broadcast over that order's WebSocket room.
+4. The customer's order page re-renders with the assigned rider shown automatically
+   (React Query cache invalidation + the WebSocket broadcast).
+5. Customer and rider open a live chat scoped to that order (`/ws/orders/{id}`, persisted
+   to `chat_messages`).
+6. Rider advances status — `accepted → picked_up → in_transit → delivered` — via
+   `PATCH /orders/{id}/status`, each transition recorded in `order_status_history`.
+7. Every status change is pushed live to the customer's tracking map and reflected the
+   next time Admin loads the orders table — one source of truth, no disconnected screens.
+
+Demo admin login is created by `server/seed_admin.py`.
+
+## Smart Nearby Pickup
+
+The rider's "Available requests" feed is sorted by **real, calculated distance** — never a
+hardcoded label.
+
+- Riders continuously report their live GPS position (`navigator.geolocation.watchPosition`
+  → `PATCH /riders/me/location`), stored on `rider_profiles.current_lat/current_lng`.
+- `GET /orders/available` (`server/routes/order_routes.py`) takes the requesting rider's
+  stored coordinates and computes the **haversine great-circle distance** (`server/core/pricing.py::haversine_km`)
+  from the rider to each pending order's pickup point, then sorts the list ascending by
+  that distance before returning it.
+- The frontend (`client/src/pages/rider/RiderDashboard.tsx`) shows each request with a
+  "X.X km away" badge and a color-coded proximity bar (green ≤2km, amber ≤5km, red beyond),
+  plus a "Sorted nearest first" indicator — matching distance-to-rider, not the order's own
+  pickup→dropoff trip length (shown separately as secondary context).
+- If the rider's location isn't known yet, the feed falls back to newest-first and tells
+  the rider to enable location — it never fabricates a distance.
+- The same haversine formula also drives fare pricing (`POST /orders/estimate`), so pricing
+  and nearby-sorting both work correctly even without a Google Maps API key.

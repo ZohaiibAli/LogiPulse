@@ -64,6 +64,7 @@ export interface Order {
   package_weight?: number | null
   notes?: string | null
   distance_km?: number | null
+  distance_from_rider_km?: number | null
   price: number
   payment_method: string
   status: OrderStatus

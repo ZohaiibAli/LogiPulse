@@ -72,6 +72,9 @@ class OrderOut(BaseModel):
     notes: Optional[str] = None
 
     distance_km: Optional[float] = None
+    # Live distance from the requesting rider's current position to the pickup
+    # point — only populated by GET /orders/available, null everywhere else.
+    distance_from_rider_km: Optional[float] = None
     price: float
     payment_method: str
     status: OrderStatus

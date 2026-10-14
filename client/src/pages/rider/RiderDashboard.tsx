@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Bike, Clock, Loader2, MapPin, Navigation, ShieldAlert } from "lucide-react"
+import { Bike, Clock, Loader2, MapPin, Navigation, ShieldAlert, LocateFixed } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -12,6 +12,15 @@ import {
 } from "@/hooks/useApi"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { getErrorMessage } from "@/lib/api"
+
+// Visual tiering for the "nearest first" distance badge/bar — purely cosmetic,
+// the actual sort order always comes from the server's haversine calculation.
+const MAX_BAR_KM = 10
+function distanceTier(km: number) {
+  if (km <= 2) return { bar: "bg-emerald-500", text: "text-emerald-600", chip: "bg-emerald-100 text-emerald-700" }
+  if (km <= 5) return { bar: "bg-amber-500", text: "text-amber-600", chip: "bg-amber-100 text-amber-700" }
+  return { bar: "bg-rose-500", text: "text-rose-600", chip: "bg-rose-100 text-rose-700" }
+}
 
 export default function RiderDashboard() {
   const navigate = useNavigate()
@@ -127,7 +136,20 @@ export default function RiderDashboard() {
       )}
 
       <div>
-        <h2 className="mb-4 text-lg font-bold">Available requests</h2>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-bold">Available requests</h2>
+          {profile?.is_online && available && available.length > 0 && (
+            available[0].distance_from_rider_km != null ? (
+              <span className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <LocateFixed className="h-3 w-3" /> Sorted nearest first
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                <MapPin className="h-3 w-3" /> Enable location for nearby sorting
+              </span>
+            )
+          )}
+        </div>
 
         {!profile?.is_online ? (
           <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
@@ -139,36 +161,56 @@ export default function RiderDashboard() {
           </div>
         ) : available && available.length > 0 ? (
           <div className="space-y-3">
-            {available.map((o) => (
-              <div key={o.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-5">
-                <div className="flex-1 space-y-1.5">
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-3.5 w-3.5 text-indigo-500" />
-                    <span className="line-clamp-1">{o.pickup_address}</span>
+            {available.map((o) => {
+              const nearbyKm = o.distance_from_rider_km ?? null
+              const tier = nearbyKm !== null ? { km: nearbyKm, ...distanceTier(nearbyKm) } : null
+              return (
+                <div key={o.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card p-5">
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold">Order #{o.id}</span>
+                      {tier && (
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${tier.chip}`}>
+                          {tier.km.toFixed(1)} km away
+                        </span>
+                      )}
+                    </div>
+                    {tier && (
+                      <div className="h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full ${tier.bar}`}
+                          style={{ width: `${Math.min(100, (tier.km / MAX_BAR_KM) * 100)}%` }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-3.5 w-3.5 text-indigo-500" />
+                      <span className="line-clamp-1">{o.pickup_address}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Navigation className="h-3.5 w-3.5 text-violet-500" />
+                      <span className="line-clamp-1">{o.dropoff_address}</span>
+                    </div>
+                    <div className="flex items-center gap-3 pt-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatDate(o.created_at)}</span>
+                      <span>{o.distance_km} km trip</span>
+                      <span className="capitalize">{o.package_type}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Navigation className="h-3.5 w-3.5 text-violet-500" />
-                    <span className="line-clamp-1">{o.dropoff_address}</span>
-                  </div>
-                  <div className="flex items-center gap-3 pt-1 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatDate(o.created_at)}</span>
-                    <span>{o.distance_km} km</span>
-                    <span className="capitalize">{o.package_type}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-extrabold text-indigo-700">{formatCurrency(o.price)}</span>
+                    <Button
+                      onClick={() => handleAccept(o.id)}
+                      disabled={acceptOrder.isPending || !!activeOrder}
+                      className="rounded-full bg-brand-gradient"
+                    >
+                      {acceptOrder.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+                      Accept
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-extrabold text-indigo-700">{formatCurrency(o.price)}</span>
-                  <Button
-                    onClick={() => handleAccept(o.id)}
-                    disabled={acceptOrder.isPending || !!activeOrder}
-                    className="rounded-full bg-brand-gradient"
-                  >
-                    {acceptOrder.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
-                    Accept
-                  </Button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">

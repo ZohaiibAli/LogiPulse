@@ -83,13 +83,32 @@ def available_orders(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(UserRole.rider)),
 ):
-    """Pending orders with no rider yet — the InDrive-style request feed."""
-    return (
+    """Pending orders with no rider yet — the InDrive-style request feed.
+
+    Sorted nearest-first by the real haversine distance from the rider's
+    current (live-tracked) position to each order's pickup point — not a
+    hardcoded label and not the order's own pickup->dropoff trip distance.
+    """
+    orders = (
         db.query(Order)
         .filter(Order.status == OrderStatus.pending, Order.rider_id.is_(None))
         .order_by(Order.created_at.desc())
         .all()
     )
+
+    profile = db.query(RiderProfile).filter(RiderProfile.user_id == current_user.id).first()
+
+    if profile and profile.current_lat is not None and profile.current_lng is not None:
+        for order in orders:
+            order.distance_from_rider_km = round(
+                haversine_km(profile.current_lat, profile.current_lng, order.pickup_lat, order.pickup_lng), 2
+            )
+        orders.sort(key=lambda o: o.distance_from_rider_km)
+    else:
+        for order in orders:
+            order.distance_from_rider_km = None
+
+    return orders
 
 
 def _get_order_or_404(db: Session, order_id: int) -> Order:
