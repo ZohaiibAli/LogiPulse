@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -58,3 +60,12 @@ def health():
         return {"status": "OK", "database": "Connected"}
     except Exception as e:
         return {"status": "ERROR", "database": str(e)}
+
+
+@app.get("/ping")
+def ping():
+    """Zero-dependency liveness check — point an uptime pinger (UptimeRobot,
+    cron-job.org, etc.) at this every ~10 minutes to stop Render's free tier
+    from spinning the service down after 15 minutes of inactivity. Deliberately
+    does not touch the database, so it stays fast and never false-fails."""
+    return {"status": "alive", "time": datetime.now(timezone.utc).isoformat()}
