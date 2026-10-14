@@ -26,7 +26,7 @@ export default function DashboardShell({ navItems, roleLabel }: { navItems: NavI
         <Logo />
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -48,7 +48,7 @@ export default function DashboardShell({ navItems, roleLabel }: { navItems: NavI
         ))}
       </nav>
 
-      <div className="border-t p-3">
+      <div className="shrink-0 border-t p-3">
         <div className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white">
             {user ? getInitials(user.full_name) : "?"}
@@ -67,7 +67,7 @@ export default function DashboardShell({ navItems, roleLabel }: { navItems: NavI
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <aside className="hidden w-64 shrink-0 border-r bg-card lg:block">{sidebarContent}</aside>
+      <aside className="hidden w-64 shrink-0 border-r bg-card lg:sticky lg:top-0 lg:block lg:h-screen">{sidebarContent}</aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
