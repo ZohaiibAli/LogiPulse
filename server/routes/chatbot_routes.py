@@ -13,7 +13,7 @@ from schemas.chat import ChatbotMessageIn, ChatbotMessageOut, ChatbotHistoryItem
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
 SYSTEM_PROMPT = (
-    "You are the friendly support assistant for SwiftShip Logistics, a courier & delivery platform "
+    "You are the friendly support assistant for LogiPulse, a courier & delivery platform "
     "(book parcels, track live deliveries, riders pick up and deliver packages). "
     "Answer questions about booking a courier, tracking an order, pricing, rider payouts, "
     "and general delivery/logistics help. Keep answers short, clear, and helpful. "

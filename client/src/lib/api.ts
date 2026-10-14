@@ -3,7 +3,7 @@ import axios from "axios"
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 export const WS_URL = import.meta.env.VITE_WS_URL || API_URL.replace(/^http/, "ws")
 
-export const TOKEN_KEY = "swiftship_token"
+export const TOKEN_KEY = "logipulse_token"
 
 export const api = axios.create({
   baseURL: API_URL,

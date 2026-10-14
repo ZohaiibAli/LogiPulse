@@ -8,7 +8,7 @@ from core.security import hash_password
 from model.user import User, UserRole
 from model import rider, order, chat  # noqa: F401  (register tables on Base.metadata)
 
-ADMIN_EMAIL = "admin@swiftship.com"
+ADMIN_EMAIL = "admin@logipulse.com"
 ADMIN_PASSWORD = "admin12345"
 
 Base.metadata.create_all(bind=engine)
@@ -20,7 +20,7 @@ try:
         print(f"Admin already exists: {ADMIN_EMAIL}")
     else:
         admin = User(
-            full_name="SwiftShip Admin",
+            full_name="LogiPulse Admin",
             email=ADMIN_EMAIL,
             password_hash=hash_password(ADMIN_PASSWORD),
             role=UserRole.admin,

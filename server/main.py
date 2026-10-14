@@ -13,7 +13,7 @@ from model import user, rider, order, chat  # noqa: F401
 from routes import auth_routes, order_routes, rider_routes, admin_routes, chat_routes, chatbot_routes
 
 app = FastAPI(
-    title="SwiftShip Logistics API",
+    title="LogiPulse API",
     version="1.0.0"
 )
 
@@ -47,7 +47,7 @@ def on_startup():
 @app.get("/")
 def home():
     return {
-        "message": "SwiftShip Logistics Backend Running",
+        "message": "LogiPulse Backend Running",
         "database": "PostgreSQL (Neon)"
     }
 

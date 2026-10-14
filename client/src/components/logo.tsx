@@ -9,7 +9,7 @@ export function Logo({ className, dark }: { className?: string; dark?: boolean }
         <PackageSearch className="h-5 w-5" />
       </span>
       <span className={cn("text-lg font-extrabold tracking-tight", dark ? "text-white" : "text-foreground")}>
-        Swift<span className="text-gradient">Ship</span>
+        Logi<span className="text-gradient">Pulse</span>
       </span>
     </Link>
   )

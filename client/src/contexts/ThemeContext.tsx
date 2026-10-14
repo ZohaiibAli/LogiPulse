@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Theme = "light" | "dark"
 
-const STORAGE_KEY = "swiftship_theme"
+const STORAGE_KEY = "logipulse_theme"
 
 function getInitialTheme(): Theme {
   try {

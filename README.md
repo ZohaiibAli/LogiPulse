@@ -1,4 +1,4 @@
-# SwiftShip Logistics — Courier & Delivery Platform
+# LogiPulse — Courier & Delivery Platform
 
 An on-demand courier/delivery platform (TCS + InDrive style): customers book parcel
 deliveries, riders accept requests and deliver them, and admins run the operation —

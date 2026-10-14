@@ -87,7 +87,7 @@ export default function AuthLayout({
           </ul>
         </div>
 
-        <p className="relative z-10 text-xs text-white/40">© {new Date().getFullYear()} Swift Logistics</p>
+        <p className="relative z-10 text-xs text-white/40">© {new Date().getFullYear()} LogiPulse</p>
       </div>
 
       <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
